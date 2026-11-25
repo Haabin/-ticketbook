@@ -161,10 +161,20 @@ header .btn{white-space:nowrap}
 .viewing{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--accent);color:var(--accent-ink);border-radius:14px;padding:8px 8px 8px 14px;margin:0 0 10px}
 .viewing .btn{padding:8px 12px;background:var(--surface);color:var(--ink)}
 @media (prefers-reduced-motion:no-preference){.card{transition:transform .15s}.card:active{transform:scale(.97)}}
+/* 의견 보내기 */
+.fb-foot{max-width:440px;margin:28px auto 0;display:grid;justify-items:center;gap:6px}
+.fb-foot .btn{padding:10px 18px}
+.fb-form textarea,.fb-form input[type=email]{width:100%;border:1px solid var(--line);background:var(--sunk);color:var(--ink);border-radius:12px;padding:11px 12px;font:inherit}
+.fb-form textarea{min-height:130px;resize:vertical}
+.fb-form .seg{gap:6px}
+.fb-count{font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.fb-count.low{color:#c8202e}
+.fb-form .btn:disabled{opacity:.5;cursor:default}
 </style>
 
 <div class="app" id="app"></div>
 <div class="toast" id="toast" hidden></div>
+<footer class="fb-foot" id="fbFoot"><button class="btn primary" id="fbOpen" type="button">의견 보내기</button><span class="hint">불편한 점이나 바라는 기능을 알려 주세요</span></footer>
 
 <script>
 const W=1080,H=1350;
@@ -1566,6 +1576,49 @@ function openAccount(){
       catch(err){console.error(err);msg.textContent=/rate|seconds/i.test(err.message||'')?'잠시 뒤 다시 시도해 주세요':'메일을 보내지 못했어요. 주소를 확인해 주세요'}
       finally{b.disabled=false}}}
 }
+// ── 의견 보내기 ───────────────────────────────────────────
+const FB_KINDS=['좋아요','불편해요','이런 기능 있었으면','오류 신고'],FB_MAX=1000,FB_GAP=60*1000,FB_KEY='tb.feedback.last';
+let fbLastMem=0; // localStorage 를 못 쓰는 브라우저용
+function fbLast(){try{return Math.max(+localStorage.getItem(FB_KEY)||0,fbLastMem)}catch(e){return fbLastMem}}
+function fbMark(){fbLastMem=Date.now();try{localStorage.setItem(FB_KEY,String(fbLastMem))}catch(e){}}
+function fbWait(){return Math.max(0,FB_GAP-(Date.now()-fbLast()))}
+function fbPage(){if(view==='edit')return'기록 수정';if(view==='home')return homeMode==='crowd'?'다 같이 보기':'공책';return'기타'}
+function fbDevice(){const ua=navigator.userAgent||'';
+  return/Mobi|Android|iPhone|iPad|iPod/i.test(ua)||(navigator.maxTouchPoints>1&&matchMedia('(pointer:coarse)').matches)?'휴대폰':'컴퓨터'}
+function openFeedback(){
+  const C=window.TBCloud;
+  if(!C||!C.configured||!C.sb){toast('지금은 의견을 보낼 수 없어요. 잠시 뒤 다시 시도해 주세요');return}
+  if(fbWait()>0){toast(`방금 보내 주셨어요. ${Math.ceil(fbWait()/1000)}초 뒤에 다시 보낼 수 있어요`);return}
+  const page=fbPage(),device=fbDevice();let kind='';
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<form class="modal-in fb-form" id="fbForm" novalidate><b style="font-size:16px">의견 보내기</b>
+    <div class="field"><label id="fbKindL">어떤 의견인가요?</label><div class="seg" role="group" aria-labelledby="fbKindL">${FB_KINDS.map(k=>`<button class="chip" type="button" data-k="${esc(k)}" aria-pressed="false">${esc(k)}</button>`).join('')}</div></div>
+    <div class="field"><label for="fbMsg">내용</label><textarea id="fbMsg" maxlength="${FB_MAX}" required placeholder="편하게 적어 주세요"></textarea><span class="fb-count" id="fbCount" aria-live="polite"></span></div>
+    <div class="field"><label for="fbEmail">답장 받을 이메일 (선택)</label><input type="email" id="fbEmail" maxlength="200" autocomplete="email" placeholder="비워 둬도 돼요"></div>
+    <span class="hint" id="fbMsgHint" aria-live="polite">${page==='기타'?'':esc(page)+' 화면에서 보내는 의견이에요'}</span>
+    <button class="btn primary" type="submit" id="fbSend">보내기</button>
+    <button class="btn ghost" id="close" type="button">닫기</button></form>`;
+  document.body.appendChild(m);
+  const q=s=>m.querySelector(s),msg=q('#fbMsg'),cnt=q('#fbCount'),hint=q('#fbMsgHint'),send=q('#fbSend');
+  const close=()=>{m.remove();document.removeEventListener('keydown',onKey)};
+  const onKey=e=>{if(e.key==='Escape')close()};document.addEventListener('keydown',onKey);
+  m.onclick=e=>{if(e.target===m||e.target.id==='close')close()};
+  m.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{kind=b.dataset.k;m.querySelectorAll('[data-k]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  const count=()=>{const left=FB_MAX-msg.value.length;cnt.textContent=`남은 글자 ${left}자`;cnt.classList.toggle('low',left<=50)};
+  msg.oninput=count;count();
+  q('#fbForm').onsubmit=async e=>{e.preventDefault();
+    const text=msg.value.trim(),email=q('#fbEmail').value.trim();
+    if(!kind){hint.textContent='의견 종류를 하나 골라 주세요';return}
+    if(!text){hint.textContent='내용을 적어 주세요';msg.focus();return}
+    if(text.length>FB_MAX){hint.textContent=`내용은 ${FB_MAX}자까지 쓸 수 있어요`;return}
+    if(email&&(email.length>200||!/^[^@\s]+@[^@\s]+$/.test(email))){hint.textContent='이메일 주소를 확인해 주세요';q('#fbEmail').focus();return}
+    if(fbWait()>0){hint.textContent=`방금 보내 주셨어요. ${Math.ceil(fbWait()/1000)}초 뒤에 다시 보낼 수 있어요`;return}
+    send.disabled=true;send.textContent='보내는 중…';
+    try{await C.sendFeedback({kind,message:text,email,page,device});fbMark();close();toast('소중한 의견 고마워요!')}
+    catch(err){console.error(err);send.disabled=false;send.textContent='보내기';hint.textContent='보내지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요'}};
+  setTimeout(()=>m.querySelector('[data-k]').focus(),30);
+}
+document.getElementById('fbOpen').onclick=openFeedback;
 function showRecord(rec){
   const url=toCanvas(rec,1).toDataURL('image/jpeg',.92);
   const m=document.createElement('div');m.className='modal';
