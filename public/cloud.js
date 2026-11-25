@@ -137,6 +137,14 @@ const Cloud = {
     if (files && files.length) await this.sb.storage.from(BUCKET).remove(files.map(f => `${folder}/${f.name}`));
   },
 
+  // 의견 보내기: feedback 테이블에 쓰기만 해요(읽기 권한이 없어서 결과를 돌려받지 않아요).
+  // user_id 는 DB 가 로그인 정보로 채워요.
+  async sendFeedback({ kind, message, email, page, device }) {
+    const { error } = await this.sb.from('feedback')
+      .insert({ kind, message, email: email || null, page, device });
+    if (error) throw error;
+  },
+
   // 이 브라우저(localStorage)의 기록을 내 계정으로 올려요. 예시 기록은 빼요.
   async importLocal(list, onProgress) {
     const todo = list.filter(r => !r.sample);

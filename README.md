@@ -15,6 +15,7 @@
 | `public/cloud.js` | Supabase 연결: 이메일(매직링크) 로그인, 기록 저장·삭제, 포스터 이미지 업로드, 공개 기록 불러오기, 기존 기록 가져오기 |
 | `api/config.js` | Vercel 환경 변수의 Supabase 주소와 공개 키를 화면에 넘겨주는 함수 (secret 키는 내보내지 않아요) |
 | `supabase/schema.sql` | Supabase SQL Editor에 붙여 넣을 테이블·보안 정책(RLS)·이미지 버킷 설정 |
+| `supabase/feedback.sql` | '의견 보내기' 피드백 테이블·보안 정책. 누구나 쓰기만 되고 읽기는 대시보드에서만 |
 | `api/_lib.js` | 위 함수들이 같이 쓰는 도구 (주소로 열리지 않아요) |
 | `api/read-poster.js` | (예비) 포스터 사진을 Claude에게 보내서 공연 정보를 읽어 오는 서버 함수 |
 | `public/manifest.webmanifest`, `public/icon-*.png` | 휴대폰 홈 화면에 추가할 때 쓰는 이름과 아이콘 |
