@@ -59,22 +59,12 @@ Vercel → 프로젝트 → **Settings → Environment Variables**. Production �
 - [ ] Settings → Setup 의 설치 코드는 **붙여 넣지 않기** (GTM 이 동의 뒤에 로드)
 - [ ] Settings → Integrations 의 Google Analytics 연결 **끄기**
 
-## 6. 문서 [TODO] 채우기
+## 6. 문서 운영자 정보
 
-`public/privacy/index.html`, `public/terms/index.html` 안의 노란 **[TODO]** 칸. 지어 넣지 않았으니 직접 채워요.
-
-- [ ] 운영자(개인정보처리자) 이름 또는 사업자명, 사업자 정보 (없으면 "개인이 운영하는 비영리 서비스")
-- [ ] 연락 이메일 (방침 1·6·10항, 약관 1·9·11조)
-- [ ] 개인정보 보호책임자 이름·직책·이메일
-- [ ] 시행일 (두 문서)
-- [ ] Supabase Region → Supabase → Project Settings → General
-- [ ] Vercel Function Region → Vercel → Settings → Functions
-- [ ] 의견 내용 보유 기간 (예: 접수 후 1년)
-- [ ] Vercel 접속 로그 보관 기간 (모르면 "Vercel 정책에 따름" 유지)
-- [ ] (선택) 포스터 읽기 기능을 켰다면 Anthropic 국외 이전 행 추가
-- [ ] 수집 항목 표가 실제와 맞는지 확인
-- [ ] 다 채운 뒤: 문서 '변경 이력/부칙'에 한 줄 추가 + `public/index.html` 의 `CONSENT_VERSION` 을 그 날짜로 → 회원 전원 재동의
-- [ ] **법률 검토**: 두 문서는 초안이에요. 공개 전 전문가 검토를 권해요.
+- [x] 운영자·보호책임자·연락 이메일·사업자 정보·시행일·Supabase/Vercel 지역·의견 보유 기간 (2026-11-26 채움)
+- [ ] (해당 시) 포스터 읽기 기능(ANTHROPIC_API_KEY)을 켜면 방침 4항에 Anthropic(미국) 행 추가
+- [ ] **법률 검토**: 두 문서는 전문가 검토를 받지 않은 초안이에요. 공개 전 검토를 권해요.
+- 문서를 고칠 때: '변경 이력/부칙'에 한 줄 추가 + `public/index.html` 의 `CONSENT_VERSION` 을 그 날짜로 → 회원 전원 재동의
 
 ---
 

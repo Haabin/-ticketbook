@@ -117,18 +117,13 @@ insert into public.admin_users (user_id)
 ### 문서를 고쳤을 때
 `public/privacy/index.html` 또는 `public/terms/index.html` 을 고치면 ① 문서 안 '변경 이력/부칙' 표에 한 줄 추가, ② `public/index.html` 의 `CONSENT_VERSION` 을 같은 날짜로 변경. 그러면 모든 회원이 다음 로그인 때 다시 동의해요. 분석 배너 문구를 고쳤다면 `public/analytics.js` 의 `VERSION` 도 올려요.
 
-### 채워야 할 [TODO] (개인정보처리방침 · 이용약관)
-문서 안에 노란색 **[TODO: …]** 로 표시돼 있어요. 지어 넣지 않았으니 운영자가 직접 채워 주세요.
-1. 운영자(개인정보처리자) 이름 또는 사업자명, 사업자 정보(없으면 "개인이 운영하는 비영리 서비스")
-2. 연락 이메일 (방침 1·6·10항, 약관 1·9·11조)
-3. 개인정보 보호책임자 이름·직책·이메일
-4. 시행일 (두 문서 모두)
-5. Supabase 프로젝트 Region (Supabase → Project Settings → General 의 Region) → 국외 이전 표의 '이전 국가'
-6. Vercel Function Region (Vercel → Settings → Functions) → 국외 이전 표
-7. 의견 보내기 내용의 보유 기간 (예: 접수 후 1년)
-8. Vercel 접속 로그 보관 기간 (확인 가능하면)
-9. (선택) 포스터 읽기 기능(ANTHROPIC_API_KEY)을 켰다면 Anthropic 국외 이전 행 추가
-10. 수집 항목 표가 실제 운영과 맞는지 확인
+### 운영자 정보 (2026-11-26 채움)
+두 문서의 운영자 정보는 채워져 있어요. 바뀌면 아래 위치를 함께 고치고 '변경 이력/부칙'에 한 줄 추가한 뒤 `CONSENT_VERSION` 을 올려요.
+- 운영자·보호책임자: 하빈 (대학교 프로젝트, 개인 운영 비영리) → 방침 1·10항, 약관 1조
+- 연락 이메일 → 방침 1·6·10항, 약관 9·11조
+- Supabase 지역: 대한민국(서울) / Vercel: 미국 → 방침 4항 표
+- 의견 보유 기간: 접수 후 3개월 → 방침 3항
+- 포스터 읽기 기능(ANTHROPIC_API_KEY)을 켜면 방침 4항에 Anthropic(미국) 행을 추가해야 해요
 
 > **개발 메모**: 두 문서는 초안이며 변호사 등 전문가의 법률 검토를 받은 것이 아니에요. 공개 전 검토를 권해요.
 
