@@ -231,6 +231,7 @@ declare
   d_from  date;
   mon     date;                     -- 이번 주 월요일
   j_summary jsonb; j_daily jsonb; j_cohorts jsonb; j_week jsonb; j_funnel jsonb; j_meta jsonb;
+  n_rec   bigint;                   -- 공연 기록을 1개 이상 남긴 가입자 수 (records 표가 없으면 null)
 begin
   p_days := greatest(1, least(coalesce(p_days, 30), 365));
   d_from := today - (p_days - 1);
@@ -309,12 +310,19 @@ begin
   into j_week from n;
 
   -- 가입 → 핵심 행동 퍼널 (기간 내 가입자 기준) --------------------------------------
+  -- 공연 기록 수는 원본 records 표(schema.sql)가 있을 때만 세요. 없으면 null 로 두고 함수는 계속 돌아가요.
+  -- (표가 없으면 일반 SQL 은 컴파일 단계에서 멈추므로 execute 로 실행해요)
+  if to_regclass('public.records') is not null then
+    execute $q$ select count(*) from _su s
+                where s.sd between $1 and $2
+                  and exists (select 1 from public.records r
+                              where r.user_id = s.id and coalesce(r.data->>'kind', '') <> 'profile') $q$
+      into n_rec using d_from, today;
+  end if;
   with su as (select id from _su where sd between d_from and today)
   select jsonb_build_object(
     'signed_up',   (select count(*) from su),
-    'recorded',    (select count(*) from su where exists (
-                      select 1 from public.records r
-                      where r.user_id = su.id and coalesce(r.data->>'kind', '') <> 'profile')),
+    'recorded',    n_rec,
     'saved_image', (select count(*) from su where exists (
                       select 1 from public.user_events e
                       where e.user_id = su.id and e.event = 'image_save')))
