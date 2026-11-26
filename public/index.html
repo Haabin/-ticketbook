@@ -235,6 +235,13 @@ function persist(){if(cloudOn())return true;localRecords=records;try{localStorag
 let localRecords=records;
 const cloudOn=()=>!!(window.TBCloud&&window.TBCloud.user);
 const cloudConfigured=()=>!!(window.TBCloud&&window.TBCloud.configured);
+// 분석 이벤트 (동의 전이면 analytics.js 가 조용히 버려요). 개인정보는 넣지 않아요.
+function track(name,params){try{window.TBAnalytics&&window.TBAnalytics.track(name,params)}catch(e){}}
+// 이미지·동영상 '저장' 링크를 누르면 핵심 행동으로 기록해요 (로그인 상태면 DB 의 user_events 에도).
+document.addEventListener('click',e=>{const a=e.target&&e.target.closest&&e.target.closest('a[download]');if(!a)return;
+  const n=String(a.getAttribute('download')||'');
+  if(/.(png|jpe?g|webp)$/i.test(n)){track('image_save');if(cloudOn())window.TBCloud.logEvent('image_save')}
+  else if(/.(mp4|webm)$/i.test(n))track('video_save')});
 
 let view='home',draft=null,animT=1;
 const imgCache={};
@@ -1408,12 +1415,12 @@ function edit(id,keep){
     if(cloudOn()){
       btn.disabled=true;btn.textContent='저장하는 중…';
       try{const saved=await window.TBCloud.save(rec);const i=records.findIndex(r=>r.id===rec.id||r.id===saved.id);
-        if(i>=0)records[i]=saved;else records.push(saved);rec=saved;toast('내 계정에 보관했어요')}
+        if(i>=0)records[i]=saved;else records.push(saved);rec=saved;toast('내 계정에 보관했어요');track('record_save',{storage:'cloud'})}
       catch(err){console.error(err);btn.disabled=false;btn.textContent='기록 보관하기';toast('저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요');return}
     }else{
       const i=records.findIndex(r=>r.id===rec.id);
       if(i>=0)records[i]=rec;else records.push(rec);
-      toast(persist()?'공책에 보관했어요':'이 브라우저에서는 저장이 안 돼요. 이미지로 저장해 주세요');
+      toast(persist()?'공책에 보관했어요':'이 브라우저에서는 저장이 안 돼요. 이미지로 저장해 주세요');track('record_save',{storage:'local'});
     }
     clearPages();homeMode='book';home({focus:rec.id})};
   syncKind();bandsUI();drawAll();
@@ -1555,7 +1562,7 @@ async function importLocalRecords(btn){
 }
 function openAccount(){
   const C=window.TBCloud;if(!C)return;
-  const m=document.createElement('div');m.className='modal';
+  const m=document.createElement('div');m.className='modal';m.setAttribute('data-clarity-mask','true'); // 개인정보 화면: Clarity 녹화에서 내용 가림
   if(C.user){
     m.innerHTML=`<div class="modal-in"><b style="font-size:16px">내 계정</b><p style="text-align:left">${esc(C.user.email||'')}<br>기록은 이 계정에 저장돼서 다른 기기에서도 똑같이 보여요.</p>
       <button class="btn" id="logout" type="button">로그아웃</button><button class="btn ghost" id="close" type="button">닫기</button></div>`;
@@ -1590,7 +1597,7 @@ function openFeedback(){
   if(!C||!C.configured||!C.sb){toast('지금은 의견을 보낼 수 없어요. 잠시 뒤 다시 시도해 주세요');return}
   if(fbWait()>0){toast(`방금 보내 주셨어요. ${Math.ceil(fbWait()/1000)}초 뒤에 다시 보낼 수 있어요`);return}
   const page=fbPage(),device=fbDevice();let kind='';
-  const m=document.createElement('div');m.className='modal';
+  const m=document.createElement('div');m.className='modal';m.setAttribute('data-clarity-mask','true'); // 이메일 칸이 있어 Clarity 녹화에서 가림
   m.innerHTML=`<form class="modal-in fb-form" id="fbForm" novalidate><b style="font-size:16px">의견 보내기</b>
     <div class="field"><label id="fbKindL">어떤 의견인가요?</label><div class="seg" role="group" aria-labelledby="fbKindL">${FB_KINDS.map(k=>`<button class="chip" type="button" data-k="${esc(k)}" aria-pressed="false">${esc(k)}</button>`).join('')}</div></div>
     <div class="field"><label for="fbMsg">내용</label><textarea id="fbMsg" maxlength="${FB_MAX}" required placeholder="편하게 적어 주세요"></textarea><span class="fb-count" id="fbCount" aria-live="polite"></span></div>
@@ -1816,6 +1823,7 @@ setTimeout(start,2500);
 document.fonts.ready.then(()=>{if(started){clearPages();view==='home'?home():drawAll()}});
 </script>
 
+<script type="module" src="/analytics.js"></script>
 <script type="module" src="/cloud.js"></script>
 </body>
 </html>
