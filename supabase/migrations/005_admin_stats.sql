@@ -67,12 +67,13 @@ begin
            'day', t.d, 'signups', t.s, 'cumulative', t.c, 'dau', t.dau, 'wau', t.wau) order by t.d), '[]'::jsonb)
   into j_daily
   from (
-    select g.d::date as d,
+    select g.d,
       (select count(*) from _su where sd = g.d)  as s,
       (select count(*) from _su where sd <= g.d) as c,
       (select count(distinct user_id) from public.user_visits where visit_date = g.d) as dau,
       (select count(distinct user_id) from public.user_visits where visit_date between g.d - 6 and g.d) as wau
-    from generate_series(d_from, today, interval '1 day') g(d)
+    -- generate_series 는 '시각'을 돌려주므로 먼저 날짜(date)로 바꿔요 (안 바꾸면 g.d - 6 에서 오류)
+    from (select gs::date as d from generate_series(d_from, today, interval '1 day') gs) g
   ) t;
 
   -- 가입 주(월요일 시작) 코호트 리텐션 ----------------------------------------------
