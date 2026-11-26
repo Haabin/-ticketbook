@@ -27,6 +27,7 @@
 | `api/account/delete.js` | 회원 탈퇴 서버 함수. 본인 토큰으로 본인 계정과 이미지만 지워요 |
 | `api/read-poster.js` | (예비) 포스터 사진을 Claude에게 보내서 공연 정보를 읽어 오는 서버 함수 |
 | `public/manifest.webmanifest`, `public/icon-*.png` | 휴대폰 홈 화면에 추가할 때 쓰는 이름과 아이콘 |
+| `CHECKLIST.md` | 운영자가 직접 해야 하는 일(환경 변수, SQL, GTM·GA4·Clarity 콘솔, 문서 TODO)과 배포 전 점검 목록 |
 | `vercel.json` | 포스터 읽기 함수가 최대 60초까지 기다리도록 하는 설정 |
 
 ## 처음 배포하기
