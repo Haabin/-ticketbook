@@ -148,4 +148,5 @@ window.TBAnalytics = {
   if (state.mode && granted()) await enable();
   else state.queue.length = 0;                                        // 동의 없으면 보관한 이벤트도 버려요
   state.listeners.splice(0).forEach(fn => { try { fn(); } catch (e) { console.error(e); } });
+  window.dispatchEvent(new Event('tb:analytics-ready'));                // index.html 의 쿠키 배너가 이 신호를 기다려요
 })();
